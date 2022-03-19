@@ -56,6 +56,7 @@ def allegiance(x, y):
 		regiments[nation] += 1
 	return {'nation':nation,'regiments':regiments}
 
+# Inputs
 def input_moves(nation):
 	moves = {}
 	print("Are you boosting any hex? Enter hex if so, otherwise type NO.")
@@ -83,16 +84,6 @@ def input_moves(nation):
 		moves[(begin,end)] = num
 	return moves
 	
-def nation_scores(score_dict, last_turn=False):
-	nation_scores = Counter()
-	turns = sorted(score_dict.keys())
-	if last_turn:
-		turns.append(turns[-1]) # last round counts double
-	for t in turns:
-		for n in score_dict[t].keys():
-			nation_scores[n] += 2*score_dict[t][n]['victories'] - 2*score_dict[t][n]['defeats'] + score_dict[t][n]['hexes']
-	return nation_scores
-
 def input_true_allegiances():
 	allegiances = {}
 	done = False
@@ -113,7 +104,6 @@ def input_true_allegiances():
 				break
 	return allegiances
 
-
 def input_guesses(courtier_list, nation):
 	guesses = {}
 	print(f"Your courtiers are {courtier_list}.")
@@ -129,6 +119,15 @@ def input_guesses(courtier_list, nation):
 			print("Please type in the name as it appears above.")
 	return guesses
 
+# Scoring
+def nation_scores(score_dict, last_turn=False):
+	nation_scores = {}
+	turns = sorted(score_dict.keys())
+	if last_turn:
+		turns.append(turns[-1]) # last round counts double
+	for n in ['r', 'g', 'b']:
+		nation_scores[n] = sum([score_dict[t][n]['total'] for t in turns])
+	return nation_scores
 
 def final_scores(score_dict, monarch_guesses, true_allegiance):
 	# monarch_guesses of form {'r':{'steve':'b', 'eve':'g'}, etc}
@@ -140,28 +139,33 @@ def final_scores(score_dict, monarch_guesses, true_allegiance):
 	turns = len(score_dict.keys()) - 1
 
 	for n in ['r', 'g', 'b']:
-		for k in true_allegiance[n].keys():
-			if true_allegiance[n][k] == n:
-				courtier_scores[k] = natscores[n] - 18*turns
-			else:
-				courtier_scores[k] = 2*natscores[true_allegiance[n][k]] - natscores[n] - 19*turns
-		
-	for n in ['r', 'g', 'b']:
 		for k in monarch_guesses[n].keys():
 			if monarch_guesses[n][k] == n:
 				continue # only looking for traitors
-			courtier_scores[k] /= 2 
 			if monarch_guesses[n][k] == true_allegiance[n][k]: # monarchs need to identify traitor's true allegiance
 				monarch_scores[n] += 5
-		print(f"Monarch {n} score: {monarch_scores[n]}")
-	
+	print(f"Monarch scores: {monarch_scores}")
+
+	for n in ['r', 'g', 'b']:
+		for k in true_allegiance[n].keys():
+			if true_allegiance[n][k] == n:
+				courtier_scores[k] = monarch_scores[n] - 18*turns
+			else:
+				courtier_scores[k] = 2*monarch_scores[true_allegiance[n][k]] - monarch_scores[n] - 19*turns
+			if k in monarch_guesses[n][k] and monarch_guesses[n][k] != n: # if accused of treason
+				courtier_scores[k] // 2
+
 	courtier_list = list(courtier_scores.items())
+	np.random.shuffle(courtier_list)
+	courtier_list.sort(key=lambda x: -x[1])
 	print(courtier_list)
-	courtiers = [i[0] for i in courtier_list]
-	tickets = [max(0,i[1]**2) for i in courtier_list]
+
+	# (random) top scorer is a winner, all others go into a lottery
+	courtiers = [i for i in courtier_list[1:]]
+	tickets = [max(0,i[1])**2 for i in courtier_list[1:]]
 	weights = [t/sum(tickets) for t in tickets]
 	winners = np.random.choice(courtiers, size=3,replace=False, p=weights)
-	return list(winners)
+	return [courtier_list[0]] + list(winners)
 
 class Monarchs:
 	def make_hexes(self):
@@ -333,6 +337,10 @@ class Monarchs:
 						self.scores[self.turn][h.allegiance]['victories'] += h.regiments[nation]
 						self.scores[self.turn][nation]['defeats'] += h.regiments[nation]
 					h.regiments[nation] = 0
+		for nation in ['r','g','b']:
+			self.scores[self.turn][nation]['total'] = (2*self.scores[self.turn][nation]['victories'] - 
+													   2*self.scores[self.turn][nation]['defeats'] + 
+													   self.scores[self.turn][nation]['hexes'])
 	
 	def check(self):
 		print("Checking for errors")
@@ -352,7 +360,7 @@ class Monarchs:
 			if tot_boost[n] > 1:
 				print(f"Error: nation {n} has {tot_boost[n]} boosts")
 	
-	def make_maps(self, nation='all', savepath=None):
+	def make_maps(self, nation='all', savepath=None, show=False):
 		print("Making maps")
 		colors = []
 		names = []
@@ -394,11 +402,17 @@ class Monarchs:
 		
 		plt.figtext(0.5, 0.85, f"Turn {self.turn + 1}, {nation}", ha="center", fontsize=24)
 		if nation != 'all':
-			plt.figtext(0.5, 0.15, f"Victories on {self.wl[nation]['w']}\nDefeats on {self.wl[nation]['l']}", ha="center", fontsize=18)
+			nvic = self.wl[nation]['w']
+			nlos = self.wl[nation]['l']
+			nsco = self.scores[self.turn][nation]['total']
+			plt.figtext(0.5, 0.1, f"Victories on {nvic}\nDefeats on {nlos}\nScore for turn: {nsco}", ha="center", fontsize=18)
 
 		plt.axis('off')
 		if savepath is not None:
 			plt.savefig(savepath+f"{nation}_{self.turn + 1}.png", format='png')
+
+		if show:
+			plt.show()
 		
 	# save past states as json
 	# can reload / start a new instance from file
@@ -422,7 +436,7 @@ class Monarchs:
 		self.wl = {'r':{'w':[], 'l':[]}, 'g':{'w':[], 'l':[]}, 'b':{'w':[], 'l':[]}}
 		self.turn += 1
 	
-	def run_turn(self, savepath=None):
+	def run_turn(self, savepath=None, show_maps=False):
 		if not savepath:
 			savepath = self.savepath
 		self.border_battles()
@@ -430,7 +444,7 @@ class Monarchs:
 		self.retreats()
 		self.check()
 		for n in ['r', 'g', 'b', 'all']:
-			self.make_maps(nation=n, savepath=savepath)
+			self.make_maps(nation=n, savepath=savepath, show=show_maps)
 		self.finish_turn()
 		self.save_turn()
 
