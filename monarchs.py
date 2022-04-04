@@ -414,16 +414,15 @@ class Monarchs:
 		if show:
 			plt.show()
 		
-	# save past states as json
 	# can reload / start a new instance from file
 	def save_turn(self, savepath=None):
 		print("Saving game state")
 		gamestate = {'savepath':self.savepath, 'radius':self.radius, 'hexes':self.hexes, 'bases':self.bases, 'moves':self.moves, 
 					 'turn':self.turn, 'scores':self.scores, 'wl':self.wl}
 		if savepath:
-			savefile = savepath+f"turn_{self.turn}.txt"
+			savefile = savepath+f"turn_{self.turn - 1}.txt"
 		else:
-			savefile = self.savepath+f"turn_{self.turn}.txt"
+			savefile = self.savepath+f"turn_{self.turn - 1}.txt"
 		with open(savefile, "wb") as f:
 			pickle.dump(gamestate, f)
 			f.close
