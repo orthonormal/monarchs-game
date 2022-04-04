@@ -443,10 +443,10 @@ class Monarchs:
 		self.hex_battles()
 		self.retreats()
 		self.check()
-		self.save_turn()
 		for n in ['r', 'g', 'b', 'all']:
 			self.make_maps(nation=n, savepath=savepath, show=show_maps)
 		self.finish_turn()
+		self.save_turn()
 
 """ 
 Usage: 
