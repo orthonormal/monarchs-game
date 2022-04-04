@@ -136,7 +136,7 @@ def final_scores(score_dict, monarch_guesses, true_allegiance):
 	
 	monarch_scores = Counter({'r':natscores['r'], 'g':natscores['g'], 'b':natscores['b']})
 	courtier_scores = Counter()
-	turns = len(score_dict.keys()) - 1
+	turns = len(score_dict.keys())
 
 	for n in ['r', 'g', 'b']:
 		for k in monarch_guesses[n].keys():
@@ -164,7 +164,7 @@ def final_scores(score_dict, monarch_guesses, true_allegiance):
 	courtiers = [i for i in courtier_list[1:]]
 	tickets = [max(0,i[1])**2 for i in courtier_list[1:]]
 	weights = [t/sum(tickets) for t in tickets]
-	winners = np.random.choice(courtiers, size=3,replace=False, p=weights)
+	winners = np.random.choice(courtiers, size=2,replace=False, p=weights)
 	return [courtier_list[0]] + list(winners)
 
 class Monarchs:
@@ -400,7 +400,7 @@ class Monarchs:
 			plt.text(centers_x[i], centers_y[i]+0.25, names[i], ha='center')
 			plt.text(centers_x[i], centers_y[i]-0.1, str(regiments[i]), ha='center')
 		
-		plt.figtext(0.5, 0.85, f"Turn {self.turn + 1}, {nation}", ha="center", fontsize=24)
+		plt.figtext(0.5, 0.85, f"Turn {self.turn}, {nation}", ha="center", fontsize=24)
 		if nation != 'all':
 			nvic = self.wl[nation]['w']
 			nlos = self.wl[nation]['l']
@@ -409,7 +409,7 @@ class Monarchs:
 
 		plt.axis('off')
 		if savepath is not None:
-			plt.savefig(savepath+f"{nation}_{self.turn + 1}.png", format='png')
+			plt.savefig(savepath+f"{nation}_{self.turn}.png", format='png')
 
 		if show:
 			plt.show()
@@ -443,10 +443,10 @@ class Monarchs:
 		self.hex_battles()
 		self.retreats()
 		self.check()
+		self.save_turn()
 		for n in ['r', 'g', 'b', 'all']:
 			self.make_maps(nation=n, savepath=savepath, show=show_maps)
 		self.finish_turn()
-		self.save_turn()
 
 """ 
 Usage: 
