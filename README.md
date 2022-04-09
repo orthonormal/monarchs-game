@@ -181,14 +181,14 @@ Even though this advice is directed at individual roles, I recommend you glance 
 
 # Footnotes
 
-[^1] Border battles are included because otherwise two armies could pass through each other without battling, and I don't think the resulting strategies would be as fun.
+[^1]: Border battles are included because otherwise two armies could pass through each other without battling, and I don't think the resulting strategies would be as fun.
 
-[^2] A hex is friendly if it started out with the nation and did not get conquered on that turn, or if the nation conquered the hex on that turn.
+[^2]: A hex is friendly if it started out with the nation and did not get conquered on that turn, or if the nation conquered the hex on that turn.
 
-[^3] Except for the bathroom and for emergencies and any other common-sense exceptions.
+[^3]: Except for the bathroom and for emergencies and any other common-sense exceptions.
 
-[^4] That is, a Courtier can change the content of a set of orders entrusted to them by their Monarch. A Courtier cannot falsely claim to be the deliverer of orders.
+[^4]: That is, a Courtier can change the content of a set of orders entrusted to them by their Monarch. A Courtier cannot falsely claim to be the deliverer of orders.
 
-[^5] Negative scores count as zero raffle tickets.
+[^5]: Negative scores count as zero raffle tickets.
 
-[^6] My current best guess of how to properly balance the game: For loyal Courtiers, the constant is eighteen times (the number of rounds plus one); the plus one is to account for double-scoring the last round. For disloyal Courtiers, the constant is nineteen times (the number of rounds plus one).
+[^6]: My current best guess of how to properly balance the game: For loyal Courtiers, the constant is eighteen times (the number of rounds plus one); the plus one is to account for double-scoring the last round. For disloyal Courtiers, the constant is nineteen times (the number of rounds plus one).
