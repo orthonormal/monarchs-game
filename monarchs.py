@@ -19,17 +19,15 @@ class Hex:
 		self.boost=boost
 
 def hex_name(hextup=(0,0),radius=0):
-	if 4*radius + 1 > 26:
-		print("That hex is too big")
-		assert 0 == 1
+	if radius > 6:
+		raise ValueError(f"I can't handle radius {radius}")
 	return chr(ord('A') + hextup[0] + 2*radius) + str(hextup[1] + radius + 1)
 
 def hex_coord(hexname, radius=0):
 	try:
 		return (ord(hexname[0]) - ord('A') - 2*radius, int(hexname[1:]) - radius - 1)
 	except:
-		print(f"Invalid hexname: {hexname}")
-		return None      
+		raise ValueError(f"Invalid hexname: {hexname}")    
 		
 def hex_distance(x, y):
 	# moving up or down gets you one space closer each time
