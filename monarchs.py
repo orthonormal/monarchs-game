@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 import random
+import os
 
 class Hex:
 	def __init__(self, coordinates=None, neighbors=[], 
@@ -57,27 +58,23 @@ def allegiance(x, y):
 # Inputs
 def input_moves(nation):
 	moves = {}
-	print("Are you boosting any hex? Enter hex if so, otherwise type NO.")
-	x = input()
+	x = input("Are you boosting any hex? Enter hex if so, otherwise type NO.\n")
 	if x != 'NO':
 		moves['boost'] = x
-	print("Type END when there are no more moves to enter.")
 	while True:
-		print("Where does the move begin?")
-		begin = input()
+		begin = input("Where does the next move begin? Type END when there are no more moves to enter.\n")
 		if begin == 'END':
 			break
-		print("Where does the move end?")
-		end = input()
-		print(f"How many units are you moving from {begin} to {end}?")
+		end = input("Where does the move end?\n")
+		num = input(f"How many units are you moving from {begin} to {end}?\n")
 		try:
-			num = int(input())
+			num = int(num)
 		except:
-			print("Not an integer")
+			print(f"{num} is not an integer; try move again.")
 			continue
-		print(f"Please confirm with YES: is {nation} moving {num} units from {begin} to {end}?")
-		if input() != 'YES':
-			print("Try entering the move again.")
+		yes = input(f"Please confirm with YES: is {nation} moving {num} units from {begin} to {end}?\n")
+		if yes != 'YES':
+			print("Please enter the move again.")
 			continue
 		moves[(begin,end)] = num
 	return moves
@@ -461,6 +458,8 @@ if __name__ == "__main__":
 	if args.load:
 		game = Monarchs(loadfile=args.load)
 	elif args.new:
+		if not os.path.exists(args.new):
+			os.makedirs(args.new)
 		game = Monarchs(savepath=args.new, radius=args.r)
 	else:
 		print("Requires either a directory for a new game or a savefile from an existing one.")
